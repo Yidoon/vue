@@ -14,6 +14,7 @@ const idToTemplate = cached(id => {
   return el && el.innerHTML
 })
 
+// 在 ./runtime/index 下定义过了$mount方法，这里将$mount方法缓存到mount变量中，然后再重写$mount方法
 const mount = Vue.prototype.$mount
 Vue.prototype.$mount = function (
   el?: string | Element,
@@ -97,5 +98,6 @@ function getOuterHTML (el: Element): string {
 }
 
 Vue.compile = compileToFunctions
-
+// import vue 的时候，其实就是从这里开始引入的，这个vue又是从./runtime/index引入过来的
+// 而且在半路上，在vue的prototype上加了一些其他属性
 export default Vue

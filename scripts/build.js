@@ -8,7 +8,7 @@ if (!fs.existsSync('dist')) {
   fs.mkdirSync('dist')
 }
 
-let builds = require('./config').getAllBuilds()
+let builds = require('./config').getAllBuilds() // 一个对象，有各种模式下的配置,比如 entry dest
 
 // filter builds via command line arg
 if (process.argv[2]) {
@@ -23,7 +23,8 @@ if (process.argv[2]) {
   })
 }
 
-build(builds)
+build(builds) // 使用rollup打包，根据entry入口 将文件打包到dest （例如：web/entry-runtime-with-compiler.js -> dist/vue.common.dev.js）
+// 打包后的文件，其实就是我们最终要引入的文件。分析的时候，我们从runtme + compile这个入手
 
 function build (builds) {
   let built = 0

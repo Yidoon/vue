@@ -27,8 +27,21 @@ Vue.config.getTagNamespace = getTagNamespace
 Vue.config.isUnknownElement = isUnknownElement
 
 // install platform runtime directives & components
+// 经过core/index.js后 Vue.options中有 component  directive filter _base
 extend(Vue.options.directives, platformDirectives)
 extend(Vue.options.components, platformComponents)
+// Vue.options = {
+//   components: {
+//     Transition,
+//     TransitionGroup,
+//     KeepAlive,
+//   },
+//   directive: {
+//    model,
+//    show
+//   }
+// }
+
 
 // install platform patch function
 Vue.prototype.__patch__ = inBrowser ? patch : noop
@@ -73,4 +86,5 @@ if (inBrowser) {
   }, 0)
 }
 
+// 这里又从core/index上引入了Vue, 中途也给Vue加了一些属性
 export default Vue

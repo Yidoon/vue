@@ -33,6 +33,7 @@ const strats = config.optionMergeStrategies
  */
 if (process.env.NODE_ENV !== 'production') {
   strats.el = strats.propsData = function (parent, child, vm, key) {
+    // 如果不存在vm ，则表示是通过Vue.extent构造的子例，那么就不应该有el 和 propsData 属性
     if (!vm) {
       warn(
         `option "${key}" can only be used during instance ` +
@@ -119,11 +120,11 @@ export function mergeDataOrFn (
 }
 
 strats.data = function (
-  parentVal: any,
-  childVal: any,
-  vm?: Component
+  parentVal: any, // undefined
+  childVal: any, // {test: 11}
+  vm?: Component //
 ): ?Function {
-  if (!vm) {
+  if (!vm) { // 不存在vm表示是Vue的子例，在使用Vue.extend构造子例时，调用mergeOption没有vm
     if (childVal && typeof childVal !== 'function') {
       process.env.NODE_ENV !== 'production' && warn(
         'The "data" option should be a function ' +
@@ -386,11 +387,12 @@ function assertObjectType (name: string, value: any, vm: ?Component) {
  * Core utility used in both instantiation and inheritance.
  */
 export function mergeOptions (
-  parent: Object,
-  child: Object,
+  parent: Object, // parentOptions
+  child: Object, // childOptions
   vm?: Component
 ): Object {
   if (process.env.NODE_ENV !== 'production') {
+    // 检查 {components:{}} 中的组件名是否合法
     checkComponents(child)
   }
 
@@ -398,19 +400,19 @@ export function mergeOptions (
     child = child.options
   }
 
-  normalizeProps(child, vm)
-  normalizeInject(child, vm)
-  normalizeDirectives(child)
+  normalizeProps(child, vm) // 统一props格式最终 {props: {type: ''}}
+  normalizeInject(child, vm) // 统一inject格式,最终 {inject:{from: ''}}
+  normalizeDirectives(child) // 统一directives格式, 最终 {directives: {v-test: {bind: fn}}}
 
   // Apply extends and mixins on the child options,
   // but only if it is a raw options object that isn't
   // the result of another mergeOptions call.
   // Only merged options has the _base property.
-  if (!child._base) {
-    if (child.extends) {
+  if (!child._base) { // 在initGlobalAPI 中有一个Vue._base = Vue，这里表示不是Vue构造器的话就进入if,只有在第一次new Vue的时候才会有_base,子组件通过继承，没有_base
+    if (child.extends) { // 是否传入extends  new Vue({el: '', data:{}, props:{}, extends: {}})
       parent = mergeOptions(parent, child.extends, vm)
     }
-    if (child.mixins) {
+    if (child.mixins) { // 是否 传入mixins
       for (let i = 0, l = child.mixins.length; i < l; i++) {
         parent = mergeOptions(parent, child.mixins[i], vm)
       }
@@ -419,7 +421,8 @@ export function mergeOptions (
 
   const options = {}
   let key
-  for (key in parent) {
+  // components, directives, filters都会mergeAssets函数返回值
+  for (key in parent) { // key: components, directives, filters, _base
     mergeField(key)
   }
   for (key in child) {
@@ -430,6 +433,7 @@ export function mergeOptions (
   function mergeField (key) {
     const strat = strats[key] || defaultStrat
     options[key] = strat(parent[key], child[key], vm, key)
+    // options.data的值是一个函数,读取的时候，会去执行这个函数，然后获取值
   }
   return options
 }

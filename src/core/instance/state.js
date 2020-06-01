@@ -129,6 +129,7 @@ function initData (vm: Component) {
   let i = keys.length
   while (i--) {
     const key = keys[i]
+    // 判断data和methods中是否有重名的属性
     if (process.env.NODE_ENV !== 'production') {
       if (methods && hasOwn(methods, key)) {
         warn(
@@ -137,6 +138,7 @@ function initData (vm: Component) {
         )
       }
     }
+    // 判断data和props中是否有重名的属性
     if (props && hasOwn(props, key)) {
       process.env.NODE_ENV !== 'production' && warn(
         `The data property "${key}" is already declared as a prop. ` +
@@ -144,6 +146,7 @@ function initData (vm: Component) {
         vm
       )
     } else if (!isReserved(key)) {
+      // 将vm[key]代理到vm._data[key]上，实际上就是，当我们访问this.name时，实际访问的是this._data.name
       proxy(vm, `_data`, key)
     }
   }

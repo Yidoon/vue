@@ -34,15 +34,17 @@ export function initLifecycle (vm: Component) {
 
   // locate first non-abstract parent
   let parent = options.parent
-  if (parent && !options.abstract) {
-    while (parent.$options.abstract && parent.$parent) {
-      parent = parent.$parent
+  // 下面一段代码的目的是为了，把抽象类组件从父子关系中剔除，如果一个组件的父附件是抽象类组件，则取他的爷爷组件，然后将自己做为爷爷组件的子组件。
+  if (parent && !options.abstract) { // 当前的组件有parent，且当前的组件不是抽象类组件
+    while (parent.$options.abstract && parent.$parent) { // 如果当前组件的父组件是抽象类组件，而且父组件还有父组件
+      parent = parent.$parent // 那么将父组件的父组件，重新赋值给parent，
     }
     parent.$children.push(vm)
   }
 
   vm.$parent = parent
-  vm.$root = parent ? parent.$root : vm
+  vm.$root = parent ? parent.$root : vm // 当他是vue根实例的时候，parent是没有值的，所以$root指向的Vue根实例,但是对于根实例下面组件来说
+  // parent 是有值的，所以会取值parent.$root，由于vue组件都是嵌套或者平铺的，所以$root实例，一直都会指向Vue根实例
 
   vm.$children = []
   vm.$refs = {}

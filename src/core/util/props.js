@@ -20,12 +20,12 @@ type PropOptions = {
 
 export function validateProp (
   key: string,
-  propOptions: Object,
-  propsData: Object,
+  propOptions: Object, //自己传入的props
+  propsData: Object, //父组件的props
   vm?: Component
 ): any {
   const prop = propOptions[key]
-  const absent = !hasOwn(propsData, key)
+  const absent = !hasOwn(propsData, key) // 当前的prop key是否在 子 父组件上都有
   let value = propsData[key]
   // boolean casting
   const booleanIndex = getTypeIndex(Boolean, prop.type)

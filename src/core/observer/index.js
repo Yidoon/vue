@@ -44,6 +44,7 @@ export class Observer {
     this.dep = new Dep()
     this.vmCount = 0
     def(value, '__ob__', this)
+    // TODO 【Q】 传入的data难道还可以是一个数组吗？
     if (Array.isArray(value)) {
       if (hasProto) {
         protoAugment(value, arrayMethods)
@@ -108,6 +109,7 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
  * or the existing observer if the value already has one.
  */
 export function observe (value: any, asRootData: ?boolean): Observer | void {
+  // TODO【Q】 value instanceof VNode是什么意思？难道还存在观察VNode的情况吗？
   if (!isObject(value) || value instanceof VNode) {
     return
   }
@@ -123,6 +125,7 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
   ) {
     ob = new Observer(value)
   }
+  // TODO 【Q】 asRootData是表示他是通过new Vue({el: 'app2'})这种方式产生的吗?
   if (asRootData && ob) {
     ob.vmCount++
   }
@@ -142,17 +145,19 @@ export function defineReactive (
   const dep = new Dep()
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
+  // 设置reactive property的范围，不是所有的property都会设置成响应式
   if (property && property.configurable === false) {
     return
   }
 
   // cater for pre-defined getter/setters
+  // 在 src/core/instance/state.js 150->28 行，我们就设置了property的setter和getter
   const getter = property && property.get
   const setter = property && property.set
   if ((!getter || setter) && arguments.length === 2) {
     val = obj[key]
   }
-
+  // 当前的值是一个object的话 ，那么则继续observe下面的属性
   let childOb = !shallow && observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
@@ -173,6 +178,7 @@ export function defineReactive (
     set: function reactiveSetter (newVal) {
       const value = getter ? getter.call(obj) : val
       /* eslint-disable no-self-compare */
+      // TODO (newVal !== newVal && value !== value) 这是什么操作？
       if (newVal === value || (newVal !== newVal && value !== value)) {
         return
       }
@@ -187,6 +193,7 @@ export function defineReactive (
       } else {
         val = newVal
       }
+      // 如果新赋的值是一个对象，那么也要observe该对象
       childOb = !shallow && observe(newVal)
       dep.notify()
     }
